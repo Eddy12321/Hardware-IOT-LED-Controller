@@ -1,7 +1,7 @@
 #include <ArduinoBLE.h>
 
 BLEService ledService("19B10000-E8F2-537E-4F6C-D104768A1214");
-BLECharacteristic RED1("19B10001-E8F2-537E-4F6C-D104768A1215", BLERead | BLEWrite, 2);
+BLECharacteristic RED1("19B10001-E8F2-537E-4F6C-D104768A1215", BLERead | BLEWrite | BLEIndicate, 2);
 BLECharacteristic RED2("19B10001-E8F2-537E-4F6C-D104768A1216", BLERead | BLEWrite, 2);
 BLECharacteristic RED3("19B10001-E8F2-537E-4F6C-D104768A1217", BLERead | BLEWrite, 2);
 BLECharacteristic GREEN1("19B10001-E8F2-537E-4F6C-D104768A1218", BLERead | BLEWrite, 2);
@@ -16,13 +16,14 @@ byte red1[2];
 byte red2[2];
 byte red3[2];
 byte greenArray[6];
- byte green1[2];
+byte green1[2];
 byte green2[2];
 byte green3[2];
 byte blueArray[6];
 byte blue1[2];
 byte blue2[2];
 byte blue3[2];
+unsigned long sendtime = 0;
 
 BLEDevice central;
 
@@ -58,23 +59,13 @@ void setup() {
     red1[i] = 0;
     red2[i] = 0;
     red3[i] = 0;
-    green1[i] = 0;
-    green2[i] = 0;
-    green3[i] = 0;
-    blue1[i] = 0;
-    blue2[i] = 0;
-    blue3[i] = 0;
+    green1[i] = 80;
+    green2[i] = 80;
+    green3[i] = 80;
+    blue1[i] = 160;
+    blue2[i] = 160;
+    blue3[i] = 160;
   }
-
-  RED1.writeValue(red1, 2);
-  RED2.writeValue(red2, 2);
-  RED3.writeValue(red3, 2);
-  GREEN1.writeValue(green1, 2);
-  GREEN2.writeValue(green2, 2);
-  GREEN3.writeValue(green3, 2);
-  BLUE1.writeValue(blue1, 2);
-  BLUE2.writeValue(blue2, 2);
-  BLUE3.writeValue(blue3, 2);
 
   BLE.advertise();
 }
@@ -92,11 +83,14 @@ void loop() {
 }
 
 void Connected() {
-  
+
+  digitalWrite(2, LOW);
+  digitalWrite(3, HIGH);
+
   while (central.connected()) {
 
-    digitalWrite(2, LOW);
-    digitalWrite(3, HIGH);
+//  while ((millis() - sendtime) < 1000);
+//  sendtime = millis();
 
     for (int i = 0; i < 2; i++) {
       red1[i]++;
@@ -110,7 +104,7 @@ void Connected() {
       blue3[i]++;
     }
 
-    RED1.writeValue(red1, 2);
+    
     RED2.writeValue(red2, 2);
     RED3.writeValue(red3, 2);
     GREEN1.writeValue(green1, 2);
@@ -119,7 +113,7 @@ void Connected() {
     BLUE1.writeValue(blue1, 2);
     BLUE2.writeValue(blue2, 2);
     BLUE3.writeValue(blue3, 2);
+    RED1.writeValue(red1, 2);
 
-    delay(5000);
   }
 }
