@@ -1,17 +1,17 @@
 #include <ArduinoBLE.h>
 
-byte redArray[6];
-byte red1[2];
-byte red2[2];
-byte red3[2];
-byte greenArray[6];
-byte green1[2];
-byte green2[2];
-byte green3[2];
-byte blueArray[6];
-byte blue1[2];
-byte blue2[2];
-byte blue3[2];
+byte redArray[580];
+byte red1[195];
+byte red2[195];
+byte red3[190];
+byte greenArray[580];
+byte green1[195];
+byte green2[195];
+byte green3[190];
+byte blueArray[580];
+byte blue1[195];
+byte blue2[195];
+byte blue3[190];
 
 BLEDevice peripheral;
 BLECharacteristic RED1;
@@ -39,7 +39,7 @@ void setup() {
 
   digitalWrite(2, HIGH);
 
-  for (int i = 0; i < 6; i++) {
+  for (int i = 0; i < 580; i++) {
     redArray[i] = 0;
     greenArray[i] = 0;
     blueArray[i] = 0;
@@ -109,37 +109,41 @@ void Controlled() {
 }
 
 void Read(BLEDevice central, BLECharacteristic characteristic) {
-  RED1.readValue(red1, 2);
-  RED2.readValue(red2, 2);
-  RED3.readValue(red3, 2);
-  GREEN1.readValue(green1, 2);
-  GREEN2.readValue(green2, 2);
-  GREEN3.readValue(green3, 2);
-  BLUE1.readValue(blue1, 2);
-  BLUE2.readValue(blue2, 2);
-  BLUE3.readValue(blue3, 2);
+  RED1.readValue(red1, 195);
+  RED2.readValue(red2, 195);
+  RED3.readValue(red3, 190);
+  GREEN1.readValue(green1, 195);
+  GREEN2.readValue(green2, 195);
+  GREEN3.readValue(green3, 190);
+  BLUE1.readValue(blue1, 195);
+  BLUE2.readValue(blue2, 195);
+  BLUE3.readValue(blue3, 190);
 
-  for (int i = 0; i < 2; i++) {
-      redArray[i] = red1[i];
-      redArray[i+2] = red2[i];
-      redArray[i+4] = red3[i];
-      greenArray[i] = green1[i];
-      greenArray[i+2] = green2[i];
-      greenArray[i+4] = green3[i];
-      blueArray[i] = blue1[i];
-      blueArray[i+2] = blue2[i];
-      blueArray[i+4] = blue3[i];
+  for (int i = 0; i < 195; i++) {
+    redArray[i] = red1[i];
+    redArray[i+195] = red2[i];
+    greenArray[i] = green1[i];
+    greenArray[i+195] = green2[i];
+    blueArray[i] = blue1[i];
+    blueArray[i+195] = blue2[i];
   }
+
+  for (int i = 0; i < 190; i++) {
+    redArray[i+390] = red3[i];
+    greenArray[i+390] = green3[i];
+    blueArray[i+390] = blue3[i];
+  }
+  
   Serial.println("Reds");
-  for (int i = 0; i < 6; i++) {
+  for (int i = 0; i < 580; i++) {
     Serial.println(redArray[i]);
   }
   Serial.println("Greens");
-  for (int i = 0; i < 6; i++) {
+  for (int i = 0; i < 580; i++) {
     Serial.println(greenArray[i]);
   }
   Serial.println("Blues");
-  for (int i = 0; i < 6; i++) {
+  for (int i = 0; i < 580; i++) {
     Serial.println(blueArray[i]);
   }
 
