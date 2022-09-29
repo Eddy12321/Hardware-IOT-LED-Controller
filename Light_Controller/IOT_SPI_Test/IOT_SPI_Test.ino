@@ -1,5 +1,19 @@
 #include <ArduinoBLE.h>
 
+BLEDevice peripheral;
+BLECharacteristic READY;
+BLECharacteristic RED1;
+BLECharacteristic RED2;
+BLECharacteristic RED3;
+BLECharacteristic GREEN1;
+BLECharacteristic GREEN2;
+BLECharacteristic GREEN3;
+BLECharacteristic BLUE1;
+BLECharacteristic BLUE2;
+BLECharacteristic BLUE3;
+BLECharacteristic READER;
+
+byte READY1;
 byte redArray[580];
 byte red1[195];
 byte red2[195];
@@ -12,17 +26,7 @@ byte blueArray[580];
 byte blue1[195];
 byte blue2[195];
 byte blue3[190];
-
-BLEDevice peripheral;
-BLECharacteristic RED1;
-BLECharacteristic RED2;
-BLECharacteristic RED3;
-BLECharacteristic GREEN1;
-BLECharacteristic GREEN2;
-BLECharacteristic GREEN3;
-BLECharacteristic BLUE1;
-BLECharacteristic BLUE2;
-BLECharacteristic BLUE3;
+byte READER1;
 
 void setup() {
 
@@ -39,17 +43,18 @@ void setup() {
 
   digitalWrite(2, HIGH);
 
+  READY1 = 0;
+  READER1 = 0;
   for (int i = 0; i < 580; i++) {
     redArray[i] = 0;
     greenArray[i] = 0;
     blueArray[i] = 0;
   }
 
-  delay(5000);
 
   Serial.println("Start");
   
-  BLE.scanForUuid("19B10000-E8F2-537E-4F6C-D104768A1214");
+  BLE.scanForUuid("19B10000-E8F2-537E-4F6C-D104768A1213");
 }
 
 void loop() {
@@ -70,10 +75,11 @@ void loop() {
   
     if (!(peripheral.discoverAttributes())) {
       peripheral.disconnect();
-      BLE.scanForUuid("19b10000-e8f2-537e-4f6c-d104768a1214");
+      BLE.scanForUuid("19b10000-e8f2-537e-4f6c-d104768a1213");
       return;
     } 
-  
+
+    READY = peripheral.characteristic("19b10001-e8f2-537e-4f6c-d104768a1214");
     RED1 = peripheral.characteristic("19b10001-e8f2-537e-4f6c-d104768a1215");
     RED2 = peripheral.characteristic("19b10001-e8f2-537e-4f6c-d104768a1216");
     RED3 = peripheral.characteristic("19b10001-e8f2-537e-4f6c-d104768a1217");
@@ -83,9 +89,7 @@ void loop() {
     BLUE1 = peripheral.characteristic("19b10001-e8f2-537e-4f6c-d104768a1221");
     BLUE2 = peripheral.characteristic("19b10001-e8f2-537e-4f6c-d104768a1222");
     BLUE3 = peripheral.characteristic("19b10001-e8f2-537e-4f6c-d104768a1223");
-
-    RED1.subscribe();
-    RED1.setEventHandler(BLEWritten, Read);
+    READER = peripheral.characteristic("19b10001-e8f2-537e-4f6c-d104768a1224");
     
     Controlled();
 
@@ -99,16 +103,23 @@ void loop() {
 }
 
 void Controlled() {
-
   digitalWrite(2, LOW);
   digitalWrite(3, HIGH);
-  
   while (peripheral.connected()) {
-
+    Read();
   }
 }
 
-void Read(BLEDevice central, BLECharacteristic characteristic) {
+void Read() {
+  READY.readValue(READY1);
+
+  if (READY1 != 1) {
+    return;
+  }
+
+  READY1 = 0;
+  READY.writeValue(READY1);
+  
   RED1.readValue(red1, 195);
   RED2.readValue(red2, 195);
   RED3.readValue(red3, 190);
@@ -147,4 +158,6 @@ void Read(BLEDevice central, BLECharacteristic characteristic) {
     Serial.println(blueArray[i]);
   }
 
+  READER1 = 1;
+  READER.writeValue(READER1);
 }
