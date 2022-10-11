@@ -1,5 +1,96 @@
 #include <SPI.h>
 
+bool Avail = false;
+bool Recv = false;
+bool Ready = true;
+bool Print = false;
+
+void setup() {
+  SPI.begin();
+
+  Serial.begin(115200);
+
+  pinMode(3, INPUT);
+  pinMode(4, OUTPUT);
+  digitalWrite(4, LOW);
+  pinMode(5, OUTPUT);
+  digitalWrite(5, LOW);
+  pinMode(6, INPUT);
+  pinMode(10, OUTPUT);
+  digitalWrite(10, HIGH);
+
+  delay(5000);
+
+  SPI.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE0));
+}
+
+void loop() {
+  uint8_t buf[60];
+    
+  if (Ready == true) {
+    CheckAvail();
+  }
+
+  if (Avail == true) {
+    Avail = false;
+    digitalWrite(10, LOW);
+    SPI.transfer(0x03);
+    SPI.transfer(0x00);
+    SPI.transfer(0x00);
+    SPI.transfer(0x00);
+    for (int i = 0; i < 60; i++) {
+      buf[i] = SPI.transfer(0);
+    }
+    digitalWrite(10, HIGH);
+    digitalWrite(4, LOW);
+    digitalWrite(5, LOW);
+    Recv = true;
+  }
+
+  if (Recv == true) {
+    CheckRecv();
+  }
+  
+  if (Print == true) {
+    Print = false;
+    Serial.println("Reds");
+    for (int i = 0; i < 20; i++) {
+      Serial.println(buf[i]);
+    }
+    Serial.println("Greens");
+    for (int i = 20; i < 40; i++) {
+      Serial.println(buf[i]);
+    }
+    Serial.println("Blues");
+    for (int i = 40; i < 60; i++) {
+      Serial.println(buf[i]);
+    }
+    Ready = true;
+  }
+}
+
+void CheckAvail() {
+  if (digitalRead(6)) {
+    return;
+  }
+  Ready = false;
+  digitalWrite(4, HIGH);
+  Avail = true;
+}
+
+void CheckRecv() {
+  if (!digitalRead(3)) {
+    return;
+  }
+  digitalWrite(5, HIGH);
+  Recv = false;
+  Print = true;
+}
+
+/*
+ * 
+ * 
+ * 
 #define NUM_RGB       (580)         
 #define NUM_BYTES     (NUM_RGB*3) 
 #define DIGITAL_PIN   (8)         
@@ -11,22 +102,12 @@
 uint8_t* rgb_arr = NULL;
 uint32_t t_f;
 
-volatile bool SPIAVAIL = false;
-
 void setup() {
-
-  SPI.begin();
 
   pinMode(DIGITAL_PIN, OUTPUT);
   digitalWrite(DIGITAL_PIN, 0);
   
-  pinMode(10, OUTPUT);
-  digitalWrite(10, HIGH);
-  pinMode(5, OUTPUT);
-  digitalWrite(5, HIGH);
-
-  if((rgb_arr = (uint8_t *)malloc(NUM_BYTES)))             
-  {                 
+  if((rgb_arr = (uint8_t *)malloc(NUM_BYTES))) {                 
     memset(rgb_arr, 0, NUM_BYTES);                         
   }
 
@@ -35,41 +116,14 @@ void setup() {
   }
 
   render();
-
-  SPI.beginTransaction(SPISettings(2000000, MSBFIRST, SPI_MODE0));
-  
-  attachInterrupt(digitalPinToInterrupt(2), SPIGet, FALLING);
-
 }
 
 void loop() {
-  uint8_t buf[1740];
-  
-  if (SPIAVAIL == true) {
-   
-    SPIAVAIL = false;
-    
-    digitalWrite(10, LOW);
-    SPI.transfer(0x03);
-    SPI.transfer16(0x0000);
-    for (int i = 0; i < 1740; i++) {
-      buf[i] = SPI.transfer(0);
-    }
-    digitalWrite(10, HIGH);
-
-    for (int i = 0; i < 580; i++) {
-      setRGB(i, buf[i], buf[i + 580], buf[i + 1160]);
-    }
-    
-    render();
-
-    digitalWrite(5, HIGH);
+  for (int i = 0; i < 580; i++) {
+    setRGB(i, buf[i], buf[i + 580], buf[i + 1160]);
   }
-}
-
-void SPIGet(void) {
-  digitalWrite(5, LOW);
-  SPIAVAIL = true;
+    
+  render();
 }
 
 void setRGB(uint16_t idx, uint8_t r, uint8_t g, uint8_t b) 
@@ -138,3 +192,7 @@ void render(void)
   interrupts();                         
   t_f = micros();                 
 }
+*
+*
+*
+*/

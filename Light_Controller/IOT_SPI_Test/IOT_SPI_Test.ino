@@ -1,4 +1,5 @@
 #include <ArduinoBLE.h>
+#include <SPI.h>
 
 BLEDevice peripheral;
 BLECharacteristic READY;
@@ -12,7 +13,8 @@ BLECharacteristic BLUE1;
 BLECharacteristic BLUE2;
 BLECharacteristic BLUE3;
 BLECharacteristic READER;
-
+bool Written = false;
+bool Received = true;
 byte READY1;
 byte redArray[580];
 byte red1[195];
@@ -30,18 +32,19 @@ byte READER1;
 
 void setup() {
 
-  pinMode(2, OUTPUT);
+  SPI.begin();
+  
   pinMode(3, OUTPUT);
-  digitalWrite(2, LOW);
   digitalWrite(3, LOW);
+  pinMode(4, INPUT);
+  pinMode(5, OUTPUT);
+  digitalWrite(5, HIGH);
+  pinMode(7, OUTPUT);
+  digitalWrite(7, HIGH);
 
   if (!BLE.begin()) {
     while(1);
   }
-
-  Serial.begin(115200);
-
-  digitalWrite(2, HIGH);
 
   READY1 = 0;
   READER1 = 0;
@@ -50,11 +53,11 @@ void setup() {
     greenArray[i] = 0;
     blueArray[i] = 0;
   }
-
-
-  Serial.println("Start");
   
   BLE.scanForUuid("19B10000-E8F2-537E-4F6C-D104768A1213");
+
+  SPI.beginTransaction(SPISettings(6000000, MSBFIRST, SPI_MODE0));
+
 }
 
 void loop() {
@@ -92,10 +95,7 @@ void loop() {
     READER = peripheral.characteristic("19b10001-e8f2-537e-4f6c-d104768a1224");
     
     Controlled();
-
-    digitalWrite(3, LOW);
-    digitalWrite(2, HIGH);
-
+    
     BLE.scanForUuid("19b10000-e8f2-537e-4f6c-d104768a1214");
 
     peripheral = BLE.available();
@@ -103,10 +103,13 @@ void loop() {
 }
 
 void Controlled() {
-  digitalWrite(2, LOW);
-  digitalWrite(3, HIGH);
   while (peripheral.connected()) {
-    Read();
+    if (Received) {
+      Read();
+    }
+    if (Written) {
+      Write();
+    }
   }
 }
 
@@ -144,20 +147,40 @@ void Read() {
     greenArray[i+390] = green3[i];
     blueArray[i+390] = blue3[i];
   }
-  
-  Serial.println("Reds");
-  for (int i = 0; i < 580; i++) {
-    Serial.println(redArray[i]);
-  }
-  Serial.println("Greens");
-  for (int i = 0; i < 580; i++) {
-    Serial.println(greenArray[i]);
-  }
-  Serial.println("Blues");
-  for (int i = 0; i < 580; i++) {
-    Serial.println(blueArray[i]);
-  }
 
   READER1 = 1;
   READER.writeValue(READER1);
+  Received = false;
+  Written = true;
+}
+
+void Write() {
+  if (!digitalRead(4)) {
+    return;
+  }
+  digitalWrite(3, HIGH);
+  digitalWrite(7, HIGH);
+  digitalWrite(5, LOW);
+  SPI.transfer(0x06);
+  digitalWrite(5, HIGH);
+  digitalWrite(7, HIGH);
+  digitalWrite(5, LOW);
+  SPI.transfer(0x02);
+  SPI.transfer(0x00);
+  SPI.transfer(0x00);
+  SPI.transfer(0x00);
+  for (int i = 0; i < 580; i++) {
+    SPI.transfer(redArray[i]);
+  }
+  for (int j = 0; j < 580; j++) {
+    SPI.transfer(greenArray[j]);
+  }
+  for (int k = 0; k < 580; k++) {
+    SPI.transfer(blueArray[k]);
+  }
+  digitalWrite(5, HIGH);
+  digitalWrite(7, LOW);
+  digitalWrite(3, LOW);
+  Written = false;
+  Received = true;
 }
