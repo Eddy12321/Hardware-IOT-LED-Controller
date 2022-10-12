@@ -1,78 +1,78 @@
 #include <SPI.h>
 
-#define NUM_RGB       (580)         
+bool Ready = false;
+#define NUM_RGB       (60)         
 #define NUM_BYTES     (NUM_RGB*3) 
 #define DIGITAL_PIN   (8)         
 #define PORT          (PORTB)     
 #define PORT_PIN      (PORTB0)    
 
-#define NUM_BITS      (8)  
+#define NUM_BITS      (8) 
 
 uint8_t* rgb_arr = NULL;
 uint32_t t_f;
-volatile bool SPIAVAIL = false;
 
 void setup() {
-
   SPI.begin();
 
-  pinMode(DIGITAL_PIN, OUTPUT);
-  digitalWrite(DIGITAL_PIN, 0);
+  Serial.begin(115200);
 
-  pinMode(5, OUTPUT);
-  digitalWrite(5, HIGH);
+  pinMode(4, OUTPUT);
+  digitalWrite(4, LOW);
   pinMode(10, OUTPUT);
   digitalWrite(10, HIGH);
-
-  if((rgb_arr = (uint8_t *)malloc(NUM_BYTES)))             
-  {                 
+  pinMode(DIGITAL_PIN, OUTPUT);
+  digitalWrite(DIGITAL_PIN, 0);
+  
+  if((rgb_arr = (uint8_t *)malloc(NUM_BYTES))) {                 
     memset(rgb_arr, 0, NUM_BYTES);                         
   }
-    
-  for (int i = 0; i < 580; i++) {
-    setRGB(i, 125, 0, 0);
+
+  for (int i = 0; i < 60; i++) {
+    setRGB(i, 0, 0, 0);
   }
 
   render();
-  
-  SPI.beginTransaction(SPISettings(2000000, MSBFIRST, SPI_MODE0));
 
-  attachInterrupt(digitalPinToInterrupt(2), SPIGet, FALLING);
-  
+  delay(5000);
+
+  SPI.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE0));
+
+  attachInterrupt(digitalPinToInterrupt(2), itsTime, FALLING);
+
+  digitalWrite(4, HIGH);
 }
 
 void loop() {
+  uint8_t buf[180];
 
-  uint8_t buf[1740];
-  
-  if (SPIAVAIL == true) {
-   
-    SPIAVAIL = false;
-    
+  if (Ready == true) {
     digitalWrite(10, LOW);
     SPI.transfer(0x03);
-    SPI.transfer16(0x0000);
-    for (int i = 0; i < 1740; i++) {
+    SPI.transfer(0x00);
+    SPI.transfer(0x00);
+    SPI.transfer(0x00);
+    for (int i = 0; i < 180; i++) {
       buf[i] = SPI.transfer(0);
     }
     digitalWrite(10, HIGH);
-
-    for (int i = 0; i < 580; i++) {
-      setRGB(i, buf[i], buf[i + 580], buf[i + 1160]);
-    }
+  
+    for (int i = 0; i < 60; i++) {
+      setRGB(i, buf[i], buf[i + 60], buf[i + 120]);
+    } 
     
     render();
+    
+    Ready = false;
+    digitalWrite(4, HIGH);
+  }
 
-    digitalWrite(5, HIGH);
-  } 
 }
 
-
-void SPIGet(void) {
-  digitalWrite(5, LOW);
-  SPIAVAIL = true;
+void itsTime() {
+  digitalWrite(4, LOW);
+  Ready = true;
 }
-
 
 void setRGB(uint16_t idx, uint8_t r, uint8_t g, uint8_t b) 
 {

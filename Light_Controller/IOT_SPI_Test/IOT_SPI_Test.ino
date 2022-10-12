@@ -16,18 +16,18 @@ BLECharacteristic READER;
 bool Written = false;
 bool Received = true;
 byte READY1;
-byte redArray[580];
-byte red1[195];
-byte red2[195];
-byte red3[190];
-byte greenArray[580];
-byte green1[195];
-byte green2[195];
-byte green3[190];
-byte blueArray[580];
-byte blue1[195];
-byte blue2[195];
-byte blue3[190];
+byte redArray[60];
+byte red1[20];
+byte red2[20];
+byte red3[20];
+byte greenArray[60];
+byte green1[20];
+byte green2[20];
+byte green3[20];
+byte blueArray[60];
+byte blue1[20];
+byte blue2[20];
+byte blue3[20];
 byte READER1;
 
 void setup() {
@@ -48,7 +48,7 @@ void setup() {
 
   READY1 = 0;
   READER1 = 0;
-  for (int i = 0; i < 580; i++) {
+  for (int i = 0; i < 60; i++) {
     redArray[i] = 0;
     greenArray[i] = 0;
     blueArray[i] = 0;
@@ -123,29 +123,26 @@ void Read() {
   READY1 = 0;
   READY.writeValue(READY1);
   
-  RED1.readValue(red1, 195);
-  RED2.readValue(red2, 195);
-  RED3.readValue(red3, 190);
-  GREEN1.readValue(green1, 195);
-  GREEN2.readValue(green2, 195);
-  GREEN3.readValue(green3, 190);
-  BLUE1.readValue(blue1, 195);
-  BLUE2.readValue(blue2, 195);
-  BLUE3.readValue(blue3, 190);
+  RED1.readValue(red1, 20);
+  RED2.readValue(red2, 20);
+  RED3.readValue(red3, 20);
+  GREEN1.readValue(green1, 20);
+  GREEN2.readValue(green2, 20);
+  GREEN3.readValue(green3, 20);
+  BLUE1.readValue(blue1, 20);
+  BLUE2.readValue(blue2, 20);
+  BLUE3.readValue(blue3, 20);
 
-  for (int i = 0; i < 195; i++) {
+  for (int i = 0; i < 20; i++) {
     redArray[i] = red1[i];
-    redArray[i+195] = red2[i];
+    redArray[i+20] = red2[i];
+    redArray[i+40] = red3[i];
     greenArray[i] = green1[i];
-    greenArray[i+195] = green2[i];
+    greenArray[i+20] = green2[i];
+    greenArray[i+40] = green3[i];
     blueArray[i] = blue1[i];
-    blueArray[i+195] = blue2[i];
-  }
-
-  for (int i = 0; i < 190; i++) {
-    redArray[i+390] = red3[i];
-    greenArray[i+390] = green3[i];
-    blueArray[i+390] = blue3[i];
+    blueArray[i+20] = blue2[i];
+    blueArray[i+40] = blue3[i];
   }
 
   READER1 = 1;
@@ -169,13 +166,13 @@ void Write() {
   SPI.transfer(0x00);
   SPI.transfer(0x00);
   SPI.transfer(0x00);
-  for (int i = 0; i < 580; i++) {
+  for (int i = 0; i < 60; i++) {
     SPI.transfer(redArray[i]);
   }
-  for (int j = 0; j < 580; j++) {
+  for (int j = 0; j < 60; j++) {
     SPI.transfer(greenArray[j]);
   }
-  for (int k = 0; k < 580; k++) {
+  for (int k = 0; k < 60; k++) {
     SPI.transfer(blueArray[k]);
   }
   digitalWrite(5, HIGH);
