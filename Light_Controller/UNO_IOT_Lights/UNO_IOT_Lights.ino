@@ -29,12 +29,28 @@ void setup() {
   }
 
   for (int i = 0; i < 60; i++) {
-    setRGB(i, 0, 0, 0);
+    setRGB(i, 150, 0, 0);
   }
 
   render();
 
-  delay(5000);
+  delay(1000);
+
+  for (int i = 0; i < 60; i++) {
+    setRGB(i, 125, 125, 0);
+  }
+
+  render();
+
+  delay(1000);
+
+  for (int i = 0; i < 60; i++) {
+    setRGB(i, 0, 150, 0);
+  }
+
+  render();
+
+  delay(1000);
 
   SPI.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE0));
 

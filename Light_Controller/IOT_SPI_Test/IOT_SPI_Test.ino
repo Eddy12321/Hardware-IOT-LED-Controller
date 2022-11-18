@@ -33,6 +33,8 @@ byte READER1;
 void setup() {
 
   SPI.begin();
+
+  Serial.begin(115200);
   
   pinMode(3, OUTPUT);
   digitalWrite(3, LOW);

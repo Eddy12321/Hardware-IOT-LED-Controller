@@ -27,6 +27,8 @@ byte blue1[20];
 byte blue2[20];
 byte blue3[20];
 byte READER1;
+bool Write1 = true;
+bool Write2 = false;
 
 BLEDevice central;
 
@@ -107,7 +109,34 @@ void Connected() {
   READY.writeValue(READY1);
   
   while (central.connected()) {
-    Write();
+    if (Write1 == true) {
+      for (int i = 0; i < 20; i++) {
+        red1[i] = 0;
+        red2[i] = 0;
+        red3[i] = 0;
+        green1[i] = 150;
+        green2[i] = 150;
+        green3[i] = 150;
+        blue1[i] = 0;
+        blue2[i] = 0;
+        blue3[i] = 0;
+      }
+      Write();
+    }
+    if (Write2 == true) {
+      for (int i = 0; i < 20; i++) {
+        red1[i] = 150;
+        red2[i] = 150;
+        red3[i] = 150;
+        green1[i] = 0;
+        green2[i] = 0;
+        green3[i] = 0;
+        blue1[i] = 0;
+        blue2[i] = 0;
+        blue3[i] = 0;
+      }
+      Write();
+    }
   }
 }
 
@@ -132,4 +161,8 @@ void Write() {
 
   READY1 = 1;
   READY.writeValue(READY1);
+
+  Write1 = !Write1;
+  Write2 = !Write2;
+
 }
