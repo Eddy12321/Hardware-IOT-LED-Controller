@@ -1,4 +1,15 @@
 #include <SPI.h>
+#include <LiquidCrystal_I2C.h>
+#include <Adafruit_ADS1015.h>
+
+Adafruit_ADS1115 ads(0x48);
+
+int16_t adc0;
+float multiplier = 0.0078125F;
+float sensorTotal;
+float sensorAverage;
+float voltage;
+float current;
 
 bool Ready = false;
 #define NUM_RGB       (60)         
@@ -12,10 +23,13 @@ bool Ready = false;
 uint8_t* rgb_arr = NULL;
 uint32_t t_f;
 
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
 void setup() {
   SPI.begin();
-
-  Serial.begin(115200);
+  ads.setGain(GAIN_SIXTEEN);
+  ads.begin();
+  lcd.begin();
 
   pinMode(4, OUTPUT);
   digitalWrite(4, LOW);
@@ -80,6 +94,19 @@ void loop() {
     render();
     
     Ready = false;
+    
+    voltage = (ads.readADC_Differential_0_1() * multiplier);
+    current = voltage / 10;
+  
+    lcd.clear();
+    
+    lcd.setCursor(0, 1);
+    lcd.print("Current=");
+    lcd.setCursor(8, 1);
+    lcd.print(current);
+    lcd.setCursor(14, 1);
+    lcd.print(" A");
+    
     digitalWrite(4, HIGH);
   }
 

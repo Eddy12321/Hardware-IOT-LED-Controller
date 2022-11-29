@@ -29,6 +29,7 @@ byte blue3[20];
 byte READER1;
 bool Write1 = true;
 bool Write2 = false;
+int i = 0;
 
 BLEDevice central;
 
@@ -65,9 +66,9 @@ void setup() {
   READY1 = 0;
   READER1 = 0;
   for (int i = 0; i < 20; i++) {
-    red1[i] = 0;
-    red2[i] = 0;
-    red3[i] = 0;
+    red1[i] = 150;
+    red2[i] = 150;
+    red3[i] = 150;
     green1[i] = 0;
     green2[i] = 0;
     green3[i] = 0;
@@ -109,32 +110,48 @@ void Connected() {
   READY.writeValue(READY1);
   
   while (central.connected()) {
-    if (Write1 == true) {
-      for (int i = 0; i < 20; i++) {
+    if (Write1) {
+      if (i < 20) {
         red1[i] = 0;
-        red2[i] = 0;
-        red3[i] = 0;
         green1[i] = 150;
-        green2[i] = 150;
-        green3[i] = 150;
-        blue1[i] = 0;
-        blue2[i] = 0;
-        blue3[i] = 0;
       }
-      Write();
+      else if (i < 40) {
+        red2[i - 20] = 0;
+        green2[i - 20] = 150;
+      }
+      else {
+        red3[i - 40] = 0;
+        green3[i - 40] = 150;
+      }
+      if (i == 0) {
+        red3[19] = 150;
+        green3[19] = 0;
+        i++;
+      }
+      else if (i == 59) {
+        red3[18] = 150;
+        green3[18] = 0;
+        i = 0;
+      }
+      else {
+        if (i < 21) {
+          red1[i-1] = 150;
+          green1[i-1] = 0;
+        }
+        else if (i < 41) {
+          red2[i-21] = 150;
+          green2[i-21] = 0;
+        }
+        else {
+          red3[i-41] = 150;
+          green3[i-41] = 0;        
+        }
+        i++;
+      }
+      Write1 = !Write1;
+      Write2 = !Write2;
     }
-    if (Write2 == true) {
-      for (int i = 0; i < 20; i++) {
-        red1[i] = 150;
-        red2[i] = 150;
-        red3[i] = 150;
-        green1[i] = 0;
-        green2[i] = 0;
-        green3[i] = 0;
-        blue1[i] = 0;
-        blue2[i] = 0;
-        blue3[i] = 0;
-      }
+    if (Write2) {
       Write();
     }
   }
@@ -164,5 +181,4 @@ void Write() {
 
   Write1 = !Write1;
   Write2 = !Write2;
-
 }
