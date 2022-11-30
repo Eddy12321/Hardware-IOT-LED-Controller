@@ -43,6 +43,10 @@ void setup() {
   digitalWrite(5, HIGH);
   pinMode(7, OUTPUT);
   digitalWrite(7, HIGH);
+  pinMode(8, OUTPUT);
+  digitalWrite(8, LOW);
+  pinMode(9, OUTPUT);
+  digitalWrite(9, LOW);
 
   if (!BLE.begin()) {
     while(1);
@@ -105,11 +109,15 @@ void loop() {
 }
 
 void Controlled() {
-  while (peripheral.connected()) {
+  while (true) {
     if (Received) {
+      digitalWrite(8, HIGH);
+      digitalWrite(9, LOW);
       Read();
     }
     if (Written) {
+      digitalWrite(8, LOW);
+      digitalWrite(9, HIGH);
       Write();
     }
   }
@@ -168,15 +176,9 @@ void Write() {
   SPI.transfer(0x00);
   SPI.transfer(0x00);
   SPI.transfer(0x00);
-  for (int i = 0; i < 60; i++) {
-    SPI.transfer(redArray[i]);
-  }
-  for (int j = 0; j < 60; j++) {
-    SPI.transfer(greenArray[j]);
-  }
-  for (int k = 0; k < 60; k++) {
-    SPI.transfer(blueArray[k]);
-  }
+  SPI.transfer(redArray, 60);
+  SPI.transfer(greenArray, 60);
+  SPI.transfer(blueArray, 60);
   digitalWrite(5, HIGH);
   digitalWrite(7, LOW);
   digitalWrite(3, LOW);

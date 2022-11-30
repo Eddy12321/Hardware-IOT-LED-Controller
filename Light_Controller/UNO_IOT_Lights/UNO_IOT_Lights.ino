@@ -33,6 +33,10 @@ void setup() {
 
   pinMode(4, OUTPUT);
   digitalWrite(4, LOW);
+  pinMode(5, OUTPUT);
+  digitalWrite(5, LOW);
+  pinMode(6, OUTPUT);
+  digitalWrite(6, LOW);
   pinMode(10, OUTPUT);
   digitalWrite(10, HIGH);
   pinMode(DIGITAL_PIN, OUTPUT);
@@ -75,6 +79,8 @@ void setup() {
 
 void loop() {
   uint8_t buf[180];
+  uint64_t total = 0;
+  uint64_t avg = 0;
 
   if (Ready == true) {
     digitalWrite(10, LOW);
@@ -94,9 +100,14 @@ void loop() {
     render();
     
     Ready = false;
-    
-    voltage = (ads.readADC_Differential_0_1() * multiplier);
-    current = voltage / 10;
+    /*
+
+    for (int i = 0; i < 1000; i++) {
+      voltage = (ads.readADC_Differential_0_1() * multiplier);
+      total += voltage;
+    }
+    avg = total / 1000.0;
+    current = avg / 20.3;
   
     lcd.clear();
     
@@ -106,14 +117,18 @@ void loop() {
     lcd.print(current);
     lcd.setCursor(14, 1);
     lcd.print(" A");
-    
+    */
     digitalWrite(4, HIGH);
+    digitalWrite(5, LOW);
+    digitalWrite(6, HIGH);
   }
 
 }
 
 void itsTime() {
   digitalWrite(4, LOW);
+  digitalWrite(5, HIGH);
+  digitalWrite(6, LOW);
   Ready = true;
 }
 
