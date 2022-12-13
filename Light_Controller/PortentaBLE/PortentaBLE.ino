@@ -4,7 +4,7 @@ BLEDevice peripheral;
 BLECharacteristic CHECK;
 BLECharacteristic COMMAND;
 
-byte Check;
+byte Check = 0;
 byte Command[2];
 
 void setup() {
@@ -44,10 +44,14 @@ void loop() {
 
     COMMAND = peripheral.characteristic("19b10001-e8f2-537e-4f6c-d104768a1214");
     CHECK = peripheral.characteristic("19b10001-e8f2-537e-4f6c-d104768a1215");
-
-    Serial.println("Connected");
+    CHECK.subscribe();
+    CHECK.setEventHandler(BLEWritten, Read);
     
+    Serial.println("Connected");
+
     Controlled();
+
+    Serial.println("Resume Search");
     
     BLE.scanForUuid("19b10000-e8f2-537e-4f6c-d104768a1213");
 
@@ -57,14 +61,32 @@ void loop() {
 
 void Controlled() {
   while (peripheral.connected()) {
-    CHECK.readValue(Check);
-    if (Check > 0) {
-      COMMAND.readValue(Command, 2);
-      for (int i = 0; i < 2; i++) {
-        Serial.println(Command[i]);
-      }
-      Check = 0;
-      CHECK.writeValue(Check);
-    }
+    
+  }
+}
+
+void Read(BLEDevice central, BLECharacteristic characteristic) {
+  Serial.println("Command");
+  COMMAND.readValue(Command, 2);
+  switch (Command[0]) {
+    case 3:
+      Serial.println("Increase blink speed");
+      break;
+    case 4:
+      Serial.println("Decrease blink speed");
+      break;
+    case 11:
+      Serial.println("Increase move speed");
+      break;
+    case 12:
+      Serial.println("Decrease move speed");
+      break;
+    case 13:
+      Serial.print("Preset: ");
+      Serial.println(Command[1]);
+      break;
+    default:
+      Serial.println("Do nothing");
+      break;
   }
 }
