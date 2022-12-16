@@ -17,6 +17,10 @@ byte com;
 byte led;
 byte sendByte;
 
+void Execute();
+void LightUp();
+void render();
+
 void setup() {
 
   Serial.begin(115200);
